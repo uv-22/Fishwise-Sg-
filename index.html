@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>FishWise SG</title>
+<meta name="description" content="University project prototype: Singapore's casual-fishing companion — satellite spot map, courses, AI fish ID, live weather and community." />
+<meta name="theme-color" content="#0D1B2A" />
+<link rel="stylesheet" href="src/styles.css" />
+<link rel="stylesheet" href="src/platform.css" />
+<link rel="stylesheet" href="src/learn.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230F7A76'/%3E%3Cpath d='M7 16c4-6 11-6 14 0-3 6-10 6-14 0Z' fill='none' stroke='%23FAF7F2' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M21 16l5-4v8l-5-4Z' fill='%23FAF7F2'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://server.arcgisonline.com" crossorigin />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div id="app"></div>
+  <div id="modal-root"></div>
+  <div id="toast-root" class="toast-root" role="status" aria-live="polite"></div>
+  <noscript>
+    <div class="noscript">FishWise SG is an interactive prototype and needs JavaScript enabled.</div>
+  </noscript>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
