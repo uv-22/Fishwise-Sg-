@@ -11,9 +11,13 @@ import * as cast from './scenes/cast.js';
 import * as knot from './scenes/knot.js';
 import * as water from './scenes/read-water.js';
 import * as handling from './scenes/handling.js';
+import * as rig from './scenes/rig.js';
+import * as tide from './scenes/tide.js';
+import * as storm from './scenes/storm.js';
+import * as fight from './scenes/fight.js';
 
-export const SCENES = { cast, knot, water, handling };
-export const SCENE_ORDER = ['knot', 'cast', 'water', 'handling'];
+export const SCENES = { cast, knot, water, handling, rig, tide, storm, fight };
+export const SCENE_ORDER = ['knot', 'cast', 'storm', 'water', 'rig', 'fight', 'handling', 'tide'];
 
 export function sceneMeta(id) {
   return SCENES[id]?.meta || null;
@@ -158,9 +162,9 @@ export function mountPlayer(root, sceneId, { onComplete, completed = false } = {
   loadThree()
     .then(async () => {
       if (disposed || !root.isConnected) return;
-      stage = createStage(el.stage, el.labels, sceneId === 'knot' || sceneId === 'handling'
+      stage = createStage(el.stage, el.labels, m.stage || (sceneId === 'knot' || sceneId === 'handling'
         ? { skyTop: '#cfe0e6', skyHorizon: '#f3f1ea', fog: false, exposure: 1.05 }
-        : {});
+        : {}));
       instance = await mod.create(stage, api);
       if (disposed) return;
       if (new URLSearchParams(location.search).has('debug3d')) window.__p3d = { stage, instance, api };

@@ -94,7 +94,7 @@ function lessonsRegion(ctx) {
   <section class="community-lessons" aria-labelledby="cl-title">
     <div class="section-head">
       <h2 id="cl-title">${icon('community', 18)} Community lessons</h2>
-      <a class="btn btn-secondary btn-sm" href="#/studio">${icon('pen', 15)} Write a lesson</a>
+
     </div>
     ${community.length ? `<div class="cl-grid">${community.map((l) => {
       const s = lessonStatus(l, learning);
@@ -104,7 +104,7 @@ function lessonsRegion(ctx) {
         <p class="small muted">${esc(l.summary || '')}</p>
         <span class="small muted">${icon('user', 12)} ${esc(l.author)}${l.own ? ' (you)' : ''} · ${l.minutes} min · ${STATUS_LABEL[s]}</span>
       </a>`;
-    }).join('')}</div>` : `<div class="card"><div class="empty"><span class="empty-ico">${icon('pen', 20)}</span><h3>No community lessons ${filters.q || filters.type !== 'all' || filters.status !== 'any' ? 'match these filters' : 'yet'}</h3><p>Experienced anglers can share what they know in the Lesson Studio.</p></div></div>`}
+    }).join('')}</div>` : `<div class="card"><div class="empty"><span class="empty-ico">${icon('pen', 20)}</span><h3>No community lessons ${filters.q || filters.type !== 'all' || filters.status !== 'any' ? 'match these filters' : 'yet'}</h3><p>Community lessons will appear here when experienced anglers share them.</p></div></div>`}
   </section>`;
 
   return `
@@ -121,7 +121,7 @@ function overview(ctx) {
     eyebrow: 'FishWise Academy',
     title: 'Learn to fish, step by step',
     lede: `Three tracks from your first cast to mentoring others — with interactive 3D lessons, quizzes and certificates. Lessons earn ${POINTS.lesson} points, passed quizzes ${POINTS.quiz}, finished tracks ${POINTS.track}.`,
-    actions: `<a class="btn btn-secondary" href="#/trainer">${icon('cube', 16)} 3D lessons</a><a class="btn btn-primary" href="#/studio">${icon('pen', 16)} Lesson Studio</a>`,
+    actions: `<a class="btn btn-secondary" href="#/trainer">${icon('cube', 16)} 3D lessons</a><a class="btn btn-primary" href="#/store">${icon('bag', 16)} Gear advisor</a>`,
   })}
 
   <section class="card learn-summary" aria-label="Your learning progress">
@@ -132,7 +132,7 @@ function overview(ctx) {
       <div><b>${sum.threeDDone}<small>/${sum.threeDTotal}</small></b><span>3D lessons</span></div>
       <div><b>${sum.certificates.length}<small>/3</small></b><span>Certificates</span></div>
     </div>
-    ${next ? `<a class="lesson-link ls-next" href="#/academy/${next.lesson.id}"><span><span class="eyebrow">Up next · ${esc(next.track.title)}</span><b>${esc(next.lesson.title)}</b><span>${next.lesson.kind === '3d' ? '3D lesson · ' : ''}${next.lesson.minutes} min</span></span>${icon('arrowRight', 18)}</a>` : `<div class="ls-next notice notice-teal">${icon('trophy', 16)}<div><strong>All tracks complete!</strong> Share what you know in the Lesson Studio.</div></div>`}
+    ${next ? `<a class="lesson-link ls-next" href="#/academy/${next.lesson.id}"><span><span class="eyebrow">Up next · ${esc(next.track.title)}</span><b>${esc(next.lesson.title)}</b><span>${next.lesson.kind === '3d' ? '3D lesson · ' : ''}${next.lesson.minutes} min</span></span>${icon('arrowRight', 18)}</a>` : `<div class="ls-next notice notice-teal">${icon('trophy', 16)}<div><strong>All tracks complete!</strong> Share what you know in Community and help a beginner.</div></div>`}
   </section>
 
   <div class="toolbar lesson-tools">
@@ -215,13 +215,13 @@ function lessonPage(ctx, found) {
   <nav class="crumbs small" aria-label="Breadcrumb">
     <a href="#/academy">Academy</a> ${icon('chevronRight', 12)} <span>${esc(isCore ? track.title : isDraft ? 'Draft preview' : 'Community')}</span> ${icon('chevronRight', 12)} <span aria-current="page">${isCore ? `Lesson ${idx + 1}` : esc(lesson.title)}</span>
   </nav>
-  ${isDraft ? `<div class="notice notice-amber" style="margin-bottom:1rem">${icon('info', 16)}<div><strong>Draft preview.</strong> Only you can see this. <a href="#/studio/${lesson.uuid}">Back to the editor</a></div></div>` : ''}
+  ${isDraft ? `<div class="notice notice-amber" style="margin-bottom:1rem">${icon('info', 16)}<div><strong>Draft preview.</strong> Only you can see this.</div></div>` : ''}
 
   <header class="lesson-top">
     <div>
       <p class="eyebrow">${esc(track.title)}${isCore ? ` · Lesson ${idx + 1} of ${track.lessons.length}` : ''} · ${lesson.minutes} min ${lesson.kind === '3d' ? `· <span class="kind-3d">${icon('cube', 11)} 3D lesson</span>` : ''}</p>
       <h1 id="page-title" tabindex="-1">${esc(lesson.title)}</h1>
-      ${lesson.community ? `<p class="muted small">${icon('user', 12)} Community lesson by ${esc(lesson.author)}${lesson.own ? ` · <a href="#/studio/${lesson.uuid}">Edit in Studio</a>` : ''}</p>` : ''}
+      ${lesson.community ? `<p class="muted small">${icon('user', 12)} Community lesson by ${esc(lesson.author)}</p>` : ''}
     </div>
     ${isDraft ? '' : `<button class="btn btn-secondary btn-sm ${isSaved ? 'is-saved' : ''}" type="button" id="save-lesson" aria-pressed="${isSaved}">${icon('bookmark', 15)} ${isSaved ? 'Saved' : 'Save'}</button>`}
   </header>

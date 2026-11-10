@@ -6,7 +6,7 @@
 import { icon } from '../icons.js';
 import { esc } from '../ui.js';
 import { SPECIES, getSpecies, DANGER } from '../data/species.js';
-import { pageHead, getSpot, spotBadge, emptyState } from '../components.js';
+import { pageHead, getSpot, spotBadge, emptyState, fishPhoto, photoCredit } from '../components.js';
 
 const WATER = { fresh: 'Freshwater', salt: 'Saltwater', brackish: 'Brackish & coastal' };
 let filter = 'all';
@@ -23,7 +23,7 @@ function list() {
   ${pageHead({
     eyebrow: 'Species guide',
     title: 'Know your fish',
-    lede: 'How to recognise, where to find, how to catch and — most importantly — how to handle the fish you are likely to meet.',
+    lede: 'Real photos of the 12 fish you are most likely to meet in Singapore — how to recognise them, where they live, how to catch them and how to handle them safely.',
     actions: `<a class="btn btn-secondary" href="#/fishid">${icon('camera', 16)} Identify from a photo</a>`,
   })}
   <div class="toolbar">
@@ -32,18 +32,20 @@ function list() {
         `<button class="seg" type="button" data-sp-filter="${k}" aria-pressed="${filter === k}">${l}</button>`).join('')}
     </div>
   </div>
-  <div class="species-grid">
+  <div class="species-grid stagger reveal">
     ${shown.length ? shown.map((s) => `
-      <a class="card species-card" href="#/species/${s.id}">
-        <div class="species-top">
-          <span class="stat-ico" style="width:36px;height:36px">${icon('fish', 18)}</span>
-          <div><h2>${esc(s.name)}</h2><p class="muted small"><i>${esc(s.scientific)}</i></p></div>
+      <a class="species-card" href="#/species/${s.id}" data-cursor="View fish">
+        ${fishPhoto(s, { tag: WATER[s.water] })}
+        <div>
+          <h2>${esc(s.name)}</h2>
+          <p class="sc-sci"><i>${esc(s.scientific)}</i></p>
         </div>
-        <div class="badge-row">${dangerBadge(s.danger)}<span class="badge badge-planned">${WATER[s.water]}</span></div>
+        <div class="badge-row">${dangerBadge(s.danger)}</div>
         <p class="small muted">${esc(s.looks)}</p>
         <span class="loc-open">Handling & where to find ${icon('arrowRight', 14)}</span>
       </a>`).join('') : emptyState({ title: 'No species in this filter', text: 'Try another filter.' })}
-  </div>`;
+  </div>
+  <p class="photo-credit" style="margin-top:1.5rem">Photos via Wikimedia Commons; credits on each species page. Where the guide covers a family, the photo shows one representative species.</p>`;
 }
 
 function detail(s) {
@@ -51,12 +53,24 @@ function detail(s) {
   return `
   <a class="btn btn-ghost btn-sm back-link" href="#/species">${icon('arrowLeft', 15)} All species</a>
   ${pageHead({ eyebrow: WATER[s.water], title: esc(s.name), lede: `<i>${esc(s.scientific)}</i> · ${esc(s.size)}` })}
-  <div class="badge-row" style="margin:-.5rem 0 1rem">${dangerBadge(s.danger)}</div>
+  <div class="species-hero">
+    <div>
+      ${fishPhoto(s, { small: false, eager: true })}
+      <p class="photo-credit">${photoCredit(s.photo)}${s.photo?.shows ? ` · Shows ${esc(s.photo.shows)}` : ''}</p>
+    </div>
+    <div>
+      <div class="badge-row" style="margin-bottom:1rem">${dangerBadge(s.danger)}<span class="badge badge-planned">${WATER[s.water]}</span></div>
+      <p class="sec-kicker">How to recognise it</p>
+      <p style="font-size:1.05rem;line-height:1.7;color:var(--ink-2)">${esc(s.looks)}</p>
+      <dl class="fod-facts">
+        <div><dt>Size</dt><dd>${esc(s.size)}</dd></div>
+        <div><dt>Handling</dt><dd>${esc(DANGER[s.danger].label)}</dd></div>
+      </dl>
+    </div>
+  </div>
   <div class="species-detail">
     <section class="card card-pad">
-      <h2 class="card-title">${icon('search', 17)} How to recognise it</h2>
-      <p style="margin-top:.5rem">${esc(s.looks)}</p>
-      <h2 class="card-title" style="margin-top:1.2rem">${icon('locations', 17)} Where to find it</h2>
+      <h2 class="card-title">${icon('locations', 17)} Where to find it</h2>
       <p style="margin-top:.5rem">${esc(s.where)}</p>
       ${spots.length ? `<div class="alt-list" style="margin-top:.7rem">${spots.map((sp) => `
         <a class="alt-row" href="#/map/${sp.id}">

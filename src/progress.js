@@ -22,8 +22,10 @@ const KEY_REDEMPTIONS = 'fishwise.redemptions';
 const KEY_SCANS = 'fishwise.scans';
 const KEY_NOTES = 'fishwise.notes';
 const KEY_MYLESSONS = 'fishwise.mylessons';
+const KEY_DAILY = 'fishwise.dailyfish';
+const DAILY_POINTS = 5;
 
-const ALL_KEYS = [KEY_LEARNING, KEY_COMMUNITY, KEY_BOOKINGS, KEY_REDEMPTIONS, KEY_SCANS, KEY_NOTES, KEY_MYLESSONS];
+const ALL_KEYS = [KEY_LEARNING, KEY_COMMUNITY, KEY_BOOKINGS, KEY_REDEMPTIONS, KEY_SCANS, KEY_NOTES, KEY_MYLESSONS, KEY_DAILY];
 
 const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
 const isStr = (v, max = 2000) => typeof v === 'string' && v.length > 0 && v.length <= max;
@@ -510,6 +512,38 @@ export function recordScan({ name, speciesId, mode, confidence }) {
 }
 
 /* ------------------------------------------------------------------
+   Daily "Name that fish" challenge
+   ------------------------------------------------------------------ */
+
+/** @returns {{date:string, speciesId:string, correct:boolean}[]} newest first */
+export function getDaily() {
+  const raw = readJSON(KEY_DAILY);
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((d) => isObj(d) && isStr(d.date, 12) && isStr(d.speciesId, 60) && typeof d.correct === 'boolean');
+}
+
+export function recordDaily(date, speciesId, correct) {
+  const list = getDaily().filter((d) => d.date !== date);
+  list.unshift({ date, speciesId, correct });
+  writeJSON(KEY_DAILY, list.slice(0, 400));
+}
+
+/** Consecutive days (ending today or yesterday) with a correct answer. */
+export function dailyStreak(today) {
+  const wins = new Set(getDaily().filter((d) => d.correct).map((d) => d.date));
+  let n = 0;
+  const d = new Date(`${today}T00:00:00`);
+  if (!wins.has(today)) d.setDate(d.getDate() - 1);
+  for (;;) {
+    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    if (!wins.has(iso)) break;
+    n += 1;
+    d.setDate(d.getDate() - 1);
+  }
+  return n;
+}
+
+/* ------------------------------------------------------------------
    Points — derived, never stored
    ------------------------------------------------------------------ */
 
@@ -555,6 +589,7 @@ export function getPoints() {
     { label: 'Answers given', count: community.answers.length, each: POINTS.answer },
     { label: 'Sessions booked', count: bookings.length, each: POINTS.booking },
     { label: 'Fish identified', count: scans.length, each: POINTS.scan },
+    { label: 'Daily fish named', count: getDaily().filter((d) => d.correct).length, each: DAILY_POINTS },
   ].map((i) => ({ ...i, total: i.count * i.each }));
 
   const earned = items.reduce((n, i) => n + i.total, 0);

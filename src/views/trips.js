@@ -5,9 +5,9 @@
 
 import { icon } from '../icons.js';
 import { esc, parseDate, monthLabel, formatHours, plural, daysFromToday } from '../ui.js';
-import { sortForList, completedTrips } from '../store.js';
-import { pageHead, emptyState, speciesChips, getSpot, spotBadge } from '../components.js';
-import { SPECIES } from '../data/species.js';
+import { sortForList, completedTrips, getStats } from '../store.js';
+import { pageHead, emptyState, speciesChips, getSpot, spotBadge, fishPhoto } from '../components.js';
+import { SPECIES, photoSmall } from '../data/species.js';
 
 const FILTERS = [
   { id: 'all', label: 'All' },
@@ -66,13 +66,42 @@ function catchRecords(trips) {
   }
   return `<div class="row-list">${rows.map((r) => `
     <a class="row row-link" href="#/species/${r.s.id}">
-      <span class="stat-ico" style="width:32px;height:32px">${icon('fish', 15)}</span>
+      <img class="thumb" src="${photoSmall(r.s.photo)}" alt="" loading="lazy" />
       <div class="row-main">
         <div class="row-title">${esc(r.s.name)}</div>
         <div class="row-meta"><span>${r.trips} ${plural(r.trips, 'trip')}</span><span>${esc(r.spots.slice(0, 2).join(', '))}${r.spots.length > 2 ? '…' : ''}</span></div>
       </div>
       ${icon('chevronRight', 17)}
     </a>`).join('')}</div>`;
+}
+
+function collection(trips) {
+  const done = completedTrips(trips);
+  const counts = new Map();
+  done.forEach((t) => (t.species || []).forEach((id) => counts.set(id, (counts.get(id) || 0) + 1)));
+  const got = SPECIES.filter((s) => counts.has(s.id)).length;
+  const pct = Math.round((got / SPECIES.length) * 100);
+  return `
+  <section class="sec" aria-labelledby="col-title">
+    <div class="sec-head">
+      <div><p class="sec-kicker">Your catch collection</p><h2 id="col-title">Every fish you can meet in Singapore — <em>${got} of ${SPECIES.length}</em> caught</h2>
+      <p>Real photos of each species. Tick the species you caught when you log a trip and it lights up here.</p></div>
+      <button class="btn btn-primary" type="button" data-action="log-trip">${icon('plus', 16)} Log a catch</button>
+    </div>
+    <div class="col-progress"><b>${pct}%</b><div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="Species collected"><span style="width:${pct}%"></span></div></div>
+    <div class="collection stagger reveal">
+      ${SPECIES.map((s) => {
+        const n = counts.get(s.id) || 0;
+        return `
+        <a class="col-card ${n ? 'is-caught' : 'is-locked'}" href="#/species/${s.id}" data-cursor="${n ? 'Your catch' : 'Not yet'}">
+          <span class="cc-pill">${n ? `${icon('check', 11)} Caught` : 'Not yet'}</span>
+          ${fishPhoto(s)}
+          <b>${esc(s.name)}</b>
+          <span class="cc-meta">${n ? `${n} ${plural(n, 'trip')}` : esc(s.water === 'fresh' ? 'Freshwater' : s.water === 'salt' ? 'Saltwater' : 'Coastal')}</span>
+        </a>`;
+      }).join('')}
+    </div>
+  </section>`;
 }
 
 export function render(ctx, param, query) {
@@ -90,12 +119,21 @@ export function render(ctx, param, query) {
     completed: ['No completed trips', 'When you get back from fishing, log it here. Zero catches still count.'],
   }[filter];
 
+  const st = getStats(ctx.trips);
+  const caught = new Set(completedTrips(ctx.trips).flatMap((t) => t.species || [])).size;
   return `
   ${pageHead({
     eyebrow: 'Personal log',
     title: 'My trips',
-    lede: 'Plan trips, record how they went and see which species you meet. Planned trips never count toward your statistics.',
-    actions: `<button class="btn btn-primary" type="button" data-action="log-trip">${icon('plus', 16)} Log a trip</button>`,
+    lede: 'Plan trips, record how they went and build your catch collection. Planned trips never count toward your statistics.',
+    extra: `
+      <div class="trips-hero-stats" style="margin-top:1.6rem">
+        <div class="ths"><b class="stat-value">${st.completedCount}</b><span>Trips done</span></div>
+        <div class="ths"><b class="stat-value">${formatHours(st.totalHours)}</b><span>Hours fished</span></div>
+        <div class="ths"><b class="stat-value">${st.fishCaught}</b><span>Fish caught</span></div>
+        <div class="ths"><b class="stat-value">${caught}</b><span>Species</span></div>
+      </div>`,
+    actions: `<button class="btn btn-secondary" type="button" data-action="plan-trip">${icon('calendar', 16)} Plan a trip</button><button class="btn btn-primary" type="button" data-action="log-trip">${icon('plus', 16)} Log a trip</button>`,
   })}
 
   <div class="trips-layout">
@@ -115,7 +153,8 @@ export function render(ctx, param, query) {
       <div class="card-head"><h2 id="records-title">Catch records</h2><span class="sub">By species</span></div>
       ${catchRecords(ctx.trips)}
     </aside>
-  </div>`;
+  </div>
+  ${collection(ctx.trips)}`;
 }
 
 export function mount(root, ctx) {

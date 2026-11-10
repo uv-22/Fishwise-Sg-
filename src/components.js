@@ -6,16 +6,17 @@ import { icon } from './icons.js';
 import { esc, openModal, closeModal, todayISO, formatDateShort } from './ui.js';
 import { validateTrip, getTrip } from './store.js';
 import { SPOTS } from './data/spots.js';
-import { SPECIES, getSpecies } from './data/species.js';
+import { SPECIES, getSpecies, photoSmall } from './data/species.js';
 
 /* ------------------------------------------------------------------
    Spot status
    ------------------------------------------------------------------ */
 
 export const SPOT_STATUS = {
-  listed: { label: 'Listed on official page', short: 'Listed', badge: 'badge-designated', icon: 'checkCircle', color: '#0F7A76' },
-  check: { label: 'Check before fishing', short: 'Check first', badge: 'badge-verify', icon: 'help', color: '#B45309' },
-  excluded: { label: 'Fishing not allowed', short: 'Not allowed', badge: 'badge-restricted', icon: 'ban', color: '#B42318' },
+  listed: { label: 'Listed on official page', short: 'Listed', badge: 'badge-designated', icon: 'checkCircle', color: '#4FA3FF' },
+  check: { label: 'Check before fishing', short: 'Check first', badge: 'badge-verify', icon: 'help', color: '#F5B455' },
+  paid: { label: 'Paid fishing pond', short: 'Paid pond', badge: 'badge-paid', icon: 'ticket', color: '#3DDC97' },
+  excluded: { label: 'Fishing not allowed', short: 'Not allowed', badge: 'badge-restricted', icon: 'ban', color: '#F0605A' },
 };
 
 export const SPOT_TYPES = {
@@ -27,6 +28,7 @@ export const SPOT_TYPES = {
   pond: 'Pond',
   island: 'Island coast',
   wetland: 'Wetland',
+  shore: 'Shore & seawall',
 };
 
 export function spotBadge(status, short = false) {
@@ -42,13 +44,14 @@ export function getSpot(id) {
    Layout helpers
    ------------------------------------------------------------------ */
 
-export function pageHead({ eyebrow, title, lede, actions = '' }) {
+export function pageHead({ eyebrow, title, lede, actions = '', extra = '' }) {
   return `
   <header class="page-head">
     <div>
       ${eyebrow ? `<p class="eyebrow">${esc(eyebrow)}</p>` : ''}
       <h1 id="page-title" tabindex="-1">${title}</h1>
       ${lede ? `<p class="lede">${lede}</p>` : ''}
+      ${extra}
     </div>
     ${actions ? `<div class="head-actions">${actions}</div>` : ''}
   </header>`;
@@ -89,6 +92,17 @@ export function renderLessonBlocks(body) {
   }).join('');
 }
 
+/** Real photo of a species (Wikimedia Commons) with a loading shimmer. */
+export function fishPhoto(species, { small = true, tag = '', eager = false } = {}) {
+  const p = species?.photo;
+  if (!p) return `<div class="fish-photo"><span class="fp-skel" aria-hidden="true"></span></div>`;
+  const src = small ? photoSmall(p) : p.src;
+  const alt = `Photo of ${species.name}${p.shows ? ` (shows ${p.shows})` : ''}`;
+  return `<div class="fish-photo"><span class="fp-skel" aria-hidden="true"></span><img src="${esc(src)}" data-full="${esc(p.src)}" alt="${esc(alt)}" ${eager ? '' : 'loading="lazy"'} decoding="async"
+    onload="this.classList.add('is-loaded');var s=this.previousElementSibling;if(s)s.remove()"
+    onerror="if(this.dataset.full&&this.src!==this.dataset.full){this.src=this.dataset.full}else{this.style.display='none'}" />${tag ? `<span class="fp-tag">${tag}</span>` : ''}</div>`;
+}
+
 export function photoCredit(photo) {
   if (!photo) return '';
   return `Photo: <a href="${esc(photo.page)}" target="_blank" rel="noopener noreferrer">${esc(photo.author)}</a>, ${esc(photo.license)}, via Wikimedia Commons`;
@@ -121,11 +135,11 @@ const FIELD_IDS = ['spot', 'location', 'date', 'status', 'durationHours', 'fishC
  * @param {string[]} [opts.species]  preselect species (e.g. from Fish ID)
  * @param {(values, tripId) => void} opts.onSave
  */
-export function openTripForm({ tripId, spotId, status, species, completing = false, onSave }) {
+export function openTripForm({ tripId, spotId, status, species, date, completing = false, onSave }) {
   const existing = tripId ? getTrip(tripId) : null;
   const trip = existing
     ? { ...existing, status: completing ? 'completed' : existing.status }
-    : { spotId: spotId || '', location: '', date: todayISO(), status: status || 'completed', durationHours: '', fishCaught: species?.length ? '1' : '', fishReleased: '', species: species || [], notes: '' };
+    : { spotId: spotId || '', location: '', date: date || todayISO(), status: status || 'completed', durationHours: '', fishCaught: species?.length ? '1' : '', fishReleased: '', species: species || [], notes: '' };
 
   const knownSpot = trip.spotId && getSpot(trip.spotId);
   const selected = knownSpot ? trip.spotId : (existing ? '__other' : (trip.spotId || ''));

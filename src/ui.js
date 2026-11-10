@@ -192,7 +192,12 @@ export function closeModal({ silent = false } = {}) {
   if (!activeModal) return;
   const { overlay, onClose, restoreFocusTo } = activeModal;
   activeModal = null;
-  overlay.remove();
+  // Animate out, then remove. Reduced motion removes straight away.
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) overlay.remove();
+  else {
+    overlay.classList.add('is-closing');
+    setTimeout(() => overlay.remove(), 240);
+  }
   document.body.style.overflow = '';
   if (restoreFocusTo && typeof restoreFocusTo.focus === 'function' && restoreFocusTo.isConnected) {
     restoreFocusTo.focus();

@@ -96,6 +96,17 @@ export async function askCoach(question) {
   return data.answer;
 }
 
+/**
+ * One-on-one gear advice. `messages` alternates user/assistant turns,
+ * starting and ending with the user.
+ * @returns {Promise<string>}
+ */
+export async function askGearAdvisor(messages) {
+  const data = await callFunction('gear-advisor', { messages });
+  if (!data.answer) throw new Error('The gear advisor returned no answer.');
+  return data.answer;
+}
+
 /* ------------------------------------------------------------------
    Offline answers — keyword search over FishWise's own guides
    ------------------------------------------------------------------ */

@@ -5,6 +5,9 @@
  *   listed   - named on the NParks or PUB fishing page (designated areas WITHIN the site)
  *   check    - not on either list, or limited by a notice; confirm on site
  *   excluded - an official page says fishing is not allowed here
+ *   paid     - a private, paid fishing pond (legal with a ticket; operator rules apply)
+ *
+ * Community spots (status check) come from angler spot lists and are marked as such.
  *
  * Coordinates: OpenStreetMap contributors (ODbL). Photos: Wikimedia Commons, credited per photo.
  * A marker is a reference point for the site, NOT a fishing boundary.
@@ -682,5 +685,223 @@ export const SPOTS = [
       "license": "CC BY-SA 4.0"
     },
     "species": []
+  },
+  {
+    "id": "west-coast-park",
+    "name": "West Coast Park seafront",
+    "area": "West Coast Park",
+    "type": "shore",
+    "lat": 1.2915,
+    "lng": 103.7675,
+    "status": "check",
+    "sources": [
+      "Angler community spot lists (not an official page)"
+    ],
+    "species": [
+      "javelin-grunter",
+      "mangrove-jack",
+      "scorpionfish"
+    ],
+    "note": "Anglers fish the rocky headland and seawall facing the West Coast. It is not on the NParks list, so obey any “No fishing” signs and confirm with NParks."
+  },
+  {
+    "id": "marina-south-pier",
+    "name": "Marina South Pier seawall",
+    "area": "Marina South",
+    "type": "shore",
+    "lat": 1.2709,
+    "lng": 103.8632,
+    "status": "check",
+    "sources": [
+      "Angler community spot lists (not an official page)"
+    ],
+    "species": [
+      "javelin-grunter",
+      "pufferfish",
+      "marine-catfish"
+    ],
+    "note": "A popular city seawall spot beside the ferry terminal. Keep clear of the ferry berths and any area signed as restricted."
+  },
+  {
+    "id": "yishun-dam",
+    "name": "Yishun Dam (seaward side)",
+    "area": "Lower Seletar, Yishun",
+    "type": "shore",
+    "lat": 1.42509,
+    "lng": 103.85747,
+    "status": "check",
+    "sources": [
+      "Angler community spot lists (not an official page)"
+    ],
+    "species": [
+      "barramundi",
+      "mangrove-jack",
+      "goatee-croaker"
+    ],
+    "note": "The dam road separates Lower Seletar Reservoir from the sea. PUB reservoir rules apply on the reservoir side, which is only fishable at designated areas; check signs before fishing the sea side."
+  },
+  {
+    "id": "changi-boardwalk",
+    "name": "Changi Point Coastal Walk",
+    "area": "Changi Village",
+    "type": "shore",
+    "lat": 1.39216,
+    "lng": 103.98543,
+    "status": "check",
+    "sources": [
+      "Angler community spot lists (not an official page)"
+    ],
+    "species": [
+      "javelin-grunter",
+      "goatee-croaker",
+      "pufferfish"
+    ],
+    "note": "The 2.2 km boardwalk hugs the coast from Changi Village. It is a walkway first, so fish only where there are no “No fishing” signs and never block the path."
+  },
+  {
+    "id": "tanah-merah-coast",
+    "name": "Tanah Merah coast",
+    "area": "Tanah Merah Ferry Road",
+    "type": "shore",
+    "lat": 1.31442,
+    "lng": 103.98838,
+    "status": "check",
+    "sources": [
+      "Angler community spot lists (not an official page)"
+    ],
+    "species": [
+      "javelin-grunter",
+      "mangrove-jack",
+      "goatee-croaker"
+    ],
+    "note": "Stretches of coast and canal mouths along Tanah Merah Coast Road are fished by locals. Much of the area is near the airport and ferry terminal, so respect every restricted-area sign."
+  },
+  {
+    "id": "kranji-dam",
+    "name": "Kranji Dam (seaward side)",
+    "area": "Kranji Way",
+    "type": "shore",
+    "lat": 1.43873,
+    "lng": 103.74033,
+    "status": "check",
+    "sources": [
+      "Angler community spot lists (not an official page)"
+    ],
+    "species": [
+      "barramundi",
+      "mangrove-jack",
+      "marine-catfish"
+    ],
+    "note": "The dam separates Kranji Reservoir from the Strait of Johor. The reservoir side is fishable only inside PUB’s designated zone; check signs before fishing the sea side."
+  },
+  {
+    "id": "coney-island",
+    "name": "Coney Island Park",
+    "area": "Punggol",
+    "type": "island",
+    "lat": 1.40942,
+    "lng": 103.92147,
+    "status": "excluded",
+    "sources": [
+      "NParks fishing practices brochure"
+    ],
+    "species": [],
+    "note": "NParks lists Coney Island Park as a park where fishing is not allowed. Fish at Punggol Point Jetty or Punggol Park instead."
+  },
+  {
+    "id": "admiralty-park",
+    "name": "Admiralty Park",
+    "area": "Woodlands",
+    "type": "wetland",
+    "lat": 1.44636,
+    "lng": 103.78058,
+    "status": "excluded",
+    "sources": [
+      "NParks fishing practices brochure"
+    ],
+    "species": [],
+    "note": "NParks lists Admiralty Park as a park where fishing is not allowed. Woodlands Waterfront Jetty is the nearest legal option."
+  },
+  {
+    "id": "sisters-islands",
+    "name": "Sisters' Islands Marine Park",
+    "area": "Southern Islands",
+    "type": "island",
+    "lat": 1.21395,
+    "lng": 103.83455,
+    "status": "excluded",
+    "sources": [
+      "NParks fishing practices brochure"
+    ],
+    "species": [],
+    "note": "Singapore's first marine park. NParks does not allow fishing or collecting marine life here."
+  },
+  {
+    "id": "sungei-api-api",
+    "name": "Sungei Api Api (Pasir Ris Park)",
+    "area": "Pasir Ris Park",
+    "type": "river",
+    "lat": 1.37962,
+    "lng": 103.94795,
+    "status": "excluded",
+    "sources": [
+      "NParks fishing page"
+    ],
+    "species": [],
+    "note": "NParks excludes the rivers, bridges and mangroves inside Pasir Ris Park from fishing. Fish the Pasir Ris beachfront instead."
+  },
+  {
+    "id": "hook-me-up",
+    "name": "Hook Me Up Fishing Pond",
+    "area": "Marina Country Club, 11 Northshore Drive",
+    "type": "pond",
+    "lat": 1.41595,
+    "lng": 103.8988,
+    "status": "paid",
+    "sources": [
+      "Operator listings (rates and hours change)"
+    ],
+    "species": [
+      "barramundi",
+      "mangrove-jack",
+      "goatee-croaker"
+    ],
+    "note": "A paid saltwater pond at Marina Country Club, Punggol. Pay by the hour; the pond’s own rules apply. Call ahead to confirm hours and rates."
+  },
+  {
+    "id": "auntie-neo-tiew",
+    "name": "Auntie Fishing Pond, Neo Tiew",
+    "area": "291 Neo Tiew Crescent",
+    "type": "pond",
+    "lat": 1.44278,
+    "lng": 103.73183,
+    "status": "paid",
+    "sources": [
+      "Operator listings (rates and hours change)"
+    ],
+    "species": [
+      "tilapia",
+      "marine-catfish",
+      "barramundi"
+    ],
+    "note": "A paid kampung-style pond in the Lim Chu Kang farmland. The marker is approximate. Call ahead to confirm hours and rates."
+  },
+  {
+    "id": "little-guilin",
+    "name": "Bukit Batok Town Park (Little Guilin)",
+    "area": "Bukit Batok",
+    "type": "pond",
+    "lat": 1.3629,
+    "lng": 103.7633,
+    "status": "check",
+    "sources": [
+      "Angler community spot lists (not an official page)"
+    ],
+    "species": [
+      "tilapia",
+      "snakehead",
+      "peacock-bass"
+    ],
+    "note": "A flooded granite quarry known as Little Guilin. It is not on the NParks fishing list — check the signs at the park before you fish."
   }
 ];

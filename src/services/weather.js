@@ -2,13 +2,19 @@
  * Live weather from data.gov.sg (NEA / Meteorological Service Singapore).
  * Public endpoints, no API key, CORS enabled.
  *
- * The anonymous rate limit is tight, so responses are cached in
+ * The anonymous rate limit is tight, so requests go through a small queue
+ * (one at a time, spaced out, one retry after a 429), responses are cached in
  * sessionStorage for five minutes and concurrent requests are de-duplicated.
  */
 
 const BASE = 'https://api-open.data.gov.sg/v2/real-time/api';
 const TTL = 5 * 60 * 1000;
+const GAP = 1200; // the anonymous limit is a handful of calls per 10 s
 const inflight = new Map();
+let queue = Promise.resolve();
+let lastAt = 0;
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function cacheGet(key) {
   try {
@@ -29,19 +35,44 @@ function cacheSet(key, data) {
   }
 }
 
+export function clearWeatherCache() {
+  try {
+    Object.keys(sessionStorage).filter((k) => k.startsWith('fw.wx.')).forEach((k) => sessionStorage.removeItem(k));
+  } catch { /* ignore */ }
+}
+
+async function fetchOnce(path) {
+  const wait = lastAt + GAP - Date.now();
+  if (wait > 0) await sleep(wait);
+  lastAt = Date.now();
+  let res;
+  try {
+    res = await fetch(`${BASE}/${path}`);
+  } catch {
+    // A rate-limited reply has no CORS header, so the browser reports it as a network error.
+    return { retry: true };
+  }
+  const body = await res.json().catch(() => ({}));
+  if (res.status === 429 || body.code === 24) return { retry: true };
+  if (!res.ok) throw new Error(`Weather service error (${res.status}).`);
+  if (body.code !== 0 || !body.data) throw new Error(body.errorMsg || 'Weather data unavailable.');
+  return { data: body.data };
+}
+
 async function getJSON(path) {
   const cached = cacheGet(path);
   if (cached) return cached;
   if (inflight.has(path)) return inflight.get(path);
-  const p = (async () => {
-    const res = await fetch(`${BASE}/${path}`);
-    if (res.status === 429) throw new Error('Weather service is busy — try again in a few seconds.');
-    if (!res.ok) throw new Error(`Weather service error (${res.status}).`);
-    const body = await res.json();
-    if (body.code !== 0 || !body.data) throw new Error(body.errorMsg || 'Weather data unavailable.');
-    cacheSet(path, body.data);
-    return body.data;
-  })();
+  const p = (queue = queue.catch(() => {}).then(async () => {
+    let r = await fetchOnce(path);
+    for (let i = 0; r.retry && i < 2; i++) {
+      await sleep(10500);
+      r = await fetchOnce(path);
+    }
+    if (r.retry) throw new Error('Weather service is busy — try again in a few seconds.');
+    cacheSet(path, r.data);
+    return r.data;
+  }));
   inflight.set(path, p);
   try {
     return await p;
@@ -89,17 +120,56 @@ export async function getTwentyFour() {
   };
 }
 
-export async function getTemperatures() {
-  const data = await getJSON('air-temperature');
+export async function getFourDay() {
+  const data = await getJSON('four-day-outlook');
+  const rec = data.records?.[0];
+  if (!rec?.forecasts?.length) throw new Error('No 4-day outlook published right now.');
+  return { updated: rec.updatedTimestamp, days: rec.forecasts };
+}
+
+/** Latest reading from a station network (air-temperature, rainfall, relative-humidity, wind-speed, wind-direction). */
+export async function getStations(kind) {
+  const data = await getJSON(kind);
   const reading = data.readings?.[0];
-  if (!reading) throw new Error('No temperature readings right now.');
+  if (!reading) throw new Error('No station readings right now.');
   const values = new Map(reading.data.map((d) => [d.stationId, d.value]));
   return {
     at: reading.timestamp,
+    unit: data.readingUnit || '',
     stations: data.stations
-      .filter((s) => values.has(s.id))
-      .map((s) => ({ name: s.name, lat: s.location.latitude, lng: s.location.longitude, value: values.get(s.id) })),
+      .filter((s) => values.has(s.id) && Number.isFinite(values.get(s.id)))
+      .map((s) => ({ id: s.id, name: s.name, lat: s.location.latitude, lng: s.location.longitude, value: values.get(s.id) })),
   };
+}
+
+export async function getTemperatures() {
+  return getStations('air-temperature');
+}
+
+/** Wind speed (km/h) and direction (degrees the wind blows FROM) per station. */
+export async function getWind() {
+  const speed = await getStations('wind-speed');
+  const dir = await getStations('wind-direction');
+  const dirs = new Map(dir.stations.map((s) => [s.id, s.value]));
+  const knots = /knot/i.test(speed.unit);
+  return {
+    at: speed.at,
+    stations: speed.stations.filter((s) => dirs.has(s.id)).map((s) => ({ ...s, kmh: knots ? s.value * 1.852 : s.value, dir: dirs.get(s.id) })),
+  };
+}
+
+export async function getUV() {
+  const data = await getJSON('uv');
+  const rec = data.records?.[0];
+  if (!rec?.index?.length) throw new Error('No UV readings right now.');
+  return { at: rec.timestamp, hours: rec.index.slice().sort((a, b) => a.hour.localeCompare(b.hour)) };
+}
+
+export async function getPSI() {
+  const data = await getJSON('psi');
+  const item = data.items?.[0];
+  if (!item?.readings?.psi_twenty_four_hourly) throw new Error('No PSI readings right now.');
+  return { at: item.timestamp, psi: item.readings.psi_twenty_four_hourly, pm25: item.readings.pm25_one_hourly || null };
 }
 
 export function nearest(list, lat, lng) {

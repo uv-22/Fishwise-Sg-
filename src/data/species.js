@@ -313,3 +313,35 @@ export function guidedMatches(chosenTags) {
   const floor = Math.max(1, ranked[0].score - 1);
   return ranked.filter((r) => r.score >= floor).slice(0, 3);
 }
+
+/* ------------------------------------------------------------------
+   Real photos (Wikimedia Commons). Where the guide covers a whole family,
+   the photo shows one representative species and says so.
+   ------------------------------------------------------------------ */
+
+const C = 'https://commons.wikimedia.org/wiki/File:';
+const T = 'https://thumb.wikimedia.org/wikipedia/commons/thumb/';
+const U = 'https://upload.wikimedia.org/wikipedia/commons/';
+
+export const SPECIES_PHOTOS = {
+  'peacock-bass': { src: `${U}4/41/Cichla_temensis.jpg`, page: `${C}Cichla_temensis.jpg`, author: 'Tiia Monto', license: 'CC BY-SA 3.0' },
+  'peacock-cichlid': { src: `${T}5/50/Cichla_ocellaris_Dvur_zoo_1.jpg/960px-Cichla_ocellaris_Dvur_zoo_1.jpg`, page: `${C}Cichla_ocellaris_Dvur_zoo_1.jpg`, author: 'Karelj', license: 'Public domain', shows: 'Cichla ocellaris' },
+  snakehead: { src: `${T}7/78/Channa_micropeltes_2012_G1.jpg/960px-Channa_micropeltes_2012_G1.jpg`, page: `${C}Channa_micropeltes_2012_G1.jpg`, author: 'George Chernilevsky', license: 'Public domain' },
+  tilapia: { src: `${T}3/3f/Til%C3%A1pia_ou_Sarotherodon_niloticus_2.jpg/960px-Til%C3%A1pia_ou_Sarotherodon_niloticus_2.jpg`, page: `${C}Til%C3%A1pia_ou_Sarotherodon_niloticus_2.jpg`, author: 'Germano Roberto Schüür', license: 'CC BY-SA 4.0', shows: 'Nile tilapia' },
+  barramundi: { src: `${T}5/50/Lates_calcarifer%2C_2014-09-19a.jpg/960px-Lates_calcarifer%2C_2014-09-19a.jpg`, page: `${C}Lates_calcarifer,_2014-09-19a.jpg`, author: 'Mitch Ames', license: 'CC BY-SA 4.0' },
+  'mangrove-jack': { src: `${U}d/d6/Lutjanus_argentimaculatus_Taiwan.png`, page: `${C}Lutjanus_argentimaculatus_Taiwan.png`, author: 'Lu I-chi', license: 'CC BY 4.0' },
+  'javelin-grunter': { src: `${T}1/1f/PomadasKaakanffish.asia_%281%29.jpg/960px-PomadasKaakanffish.asia_%281%29.jpg`, page: `${C}PomadasKaakanffish.asia_(1).jpg`, author: 'Dinh D. Tran, FiMSeA', license: 'CC BY 3.0' },
+  'goatee-croaker': { src: `${U}2/27/Dendrophysa_russelii_%28Cuvier%2C_1829%29.jpg`, page: `${C}Dendrophysa_russelii_(Cuvier,_1829).jpg`, author: 'BEDO (Thailand)', license: 'CC BY-SA 4.0' },
+  'brown-stingray': { src: `${T}a/a0/SStringray.jpg/960px-SStringray.jpg`, page: `${C}SStringray.jpg`, author: 'Wrtiii3644 at English Wikipedia', license: 'Public domain', shows: 'a representative stingray' },
+  pufferfish: { src: `${U}c/ce/Tetraodon-hispidus.jpg`, page: `${C}Tetraodon-hispidus.jpg`, author: 'NOAA', license: 'Public domain', shows: 'Arothron hispidus, a representative puffer' },
+  scorpionfish: { src: `${U}d/d2/Scorpionfish_Nick_Hobgood.jpg`, page: `${C}Scorpionfish_Nick_Hobgood.jpg`, author: 'Nick Hobgood', license: 'CC BY-SA 3.0', shows: 'a representative scorpionfish' },
+  'marine-catfish': { src: `${T}b/b1/Hexanem_sagor_110818-16448_hsk.jpg/960px-Hexanem_sagor_110818-16448_hsk.jpg`, page: `${C}Hexanem_sagor_110818-16448_hsk.jpg`, author: 'Wibowo Djatmiko (Wie146)', license: 'CC BY-SA 4.0', shows: 'Hexanematichthys sagor, a representative sea catfish' },
+};
+
+for (const s of SPECIES) s.photo = SPECIES_PHOTOS[s.id] || null;
+
+/** Smaller copy of a Commons photo for grids (Commons serves standard widths). */
+export function photoSmall(photo) {
+  if (!photo) return '';
+  return photo.src.includes('/960px-') ? photo.src.replace('/960px-', '/500px-') : photo.src;
+}
