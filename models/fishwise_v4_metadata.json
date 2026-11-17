@@ -1,0 +1,144 @@
+{
+  "model": "FishWise SG EfficientNet-B0 v4",
+  "format": "ONNX",
+  "model_file": "fishwise_v4.onnx",
+  "input": {
+    "name": "image",
+    "shape": [
+      1,
+      3,
+      224,
+      224
+    ],
+    "layout": "NCHW",
+    "dtype": "float32",
+    "resize_shorter_side": 256,
+    "crop": "centre_224",
+    "interpolation": "bicubic",
+    "rgb_mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "rgb_std": [
+      0.229,
+      0.224,
+      0.225
+    ]
+  },
+  "output": {
+    "name": "logits",
+    "postprocess": "softmax"
+  },
+  "classes": [
+    "asian_seabass",
+    "common_snakehead",
+    "eeltail_catfish",
+    "giant_snakehead",
+    "jarbua_terapon",
+    "javelin_grunt",
+    "not_a_fish",
+    "orange_spotted_grouper",
+    "peacock_bass_group",
+    "pufferfish_group",
+    "rabbitfish_group",
+    "sea_catfish",
+    "shark_group",
+    "spotted_scat",
+    "stingray_group",
+    "stonefish_stinger_group",
+    "tilapia_group"
+  ],
+  "class_to_index": {
+    "asian_seabass": 0,
+    "common_snakehead": 1,
+    "eeltail_catfish": 2,
+    "giant_snakehead": 3,
+    "jarbua_terapon": 4,
+    "javelin_grunt": 5,
+    "not_a_fish": 6,
+    "orange_spotted_grouper": 7,
+    "peacock_bass_group": 8,
+    "pufferfish_group": 9,
+    "rabbitfish_group": 10,
+    "sea_catfish": 11,
+    "shark_group": 12,
+    "spotted_scat": 13,
+    "stingray_group": 14,
+    "stonefish_stinger_group": 15,
+    "tilapia_group": 16
+  },
+  "display_names": {
+    "asian_seabass": "Asian seabass / barramundi",
+    "common_snakehead": "Common snakehead",
+    "eeltail_catfish": "Eeltail catfish",
+    "giant_snakehead": "Giant snakehead",
+    "jarbua_terapon": "Jarbua terapon",
+    "javelin_grunt": "Javelin grunt",
+    "not_a_fish": "Not a fish",
+    "orange_spotted_grouper": "Orange-spotted grouper",
+    "peacock_bass_group": "Peacock bass group",
+    "pufferfish_group": "Pufferfish group",
+    "rabbitfish_group": "Rabbitfish group",
+    "sea_catfish": "Sea catfish",
+    "shark_group": "Shark group",
+    "spotted_scat": "Spotted scat",
+    "stingray_group": "Stingray group",
+    "stonefish_stinger_group": "Stonefish / venomous-stinger group",
+    "tilapia_group": "Tilapia group"
+  },
+  "matched_guide_ids": {
+    "asian_seabass": "barramundi",
+    "common_snakehead": "snakehead",
+    "eeltail_catfish": "marine-catfish",
+    "giant_snakehead": "snakehead",
+    "jarbua_terapon": "none",
+    "javelin_grunt": "javelin-grunter",
+    "not_a_fish": "none",
+    "orange_spotted_grouper": "none",
+    "peacock_bass_group": "peacock-bass",
+    "pufferfish_group": "pufferfish",
+    "rabbitfish_group": "none",
+    "sea_catfish": "marine-catfish",
+    "shark_group": "none",
+    "spotted_scat": "none",
+    "stingray_group": "brown-stingray",
+    "stonefish_stinger_group": "scorpionfish",
+    "tilapia_group": "tilapia"
+  },
+  "danger": {
+    "asian_seabass": "caution",
+    "common_snakehead": "caution",
+    "eeltail_catfish": "danger",
+    "giant_snakehead": "caution",
+    "jarbua_terapon": "caution",
+    "javelin_grunt": "caution",
+    "not_a_fish": "caution",
+    "orange_spotted_grouper": "caution",
+    "peacock_bass_group": "caution",
+    "pufferfish_group": "danger",
+    "rabbitfish_group": "danger",
+    "sea_catfish": "danger",
+    "shark_group": "caution",
+    "spotted_scat": "danger",
+    "stingray_group": "danger",
+    "stonefish_stinger_group": "danger",
+    "tilapia_group": "caution"
+  },
+  "operating_points": {
+    "standard": {
+      "known_threshold": 0.58,
+      "not_a_fish_threshold": 0.46
+    },
+    "safety_first": {
+      "known_threshold": 0.72,
+      "not_a_fish_threshold": 0.36
+    }
+  },
+  "decision_rule": [
+    "Use not_a_fish only when its probability reaches its threshold and exceeds the best supported-fish probability.",
+    "Otherwise use unknown_fish when the best supported-fish probability is below the known threshold.",
+    "Otherwise return the supported fish class with the greatest probability."
+  ],
+  "safety_notice": "Classification is not handling or edibility advice. Unknown or unfamiliar fish must be treated conservatively."
+}

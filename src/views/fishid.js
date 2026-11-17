@@ -12,7 +12,7 @@ import { getSpecies, GUIDED_QUESTIONS, guidedMatches, DANGER } from '../data/spe
 import { POINTS } from '../data/courses.js';
 import { recordScan, getScans } from '../progress.js';
 import { pageHead } from '../components.js';
-import { aiConnected, checkImageFile, prepareImage, identifyFish } from '../services/ai.js';
+import { aiConnected, cnnAvailable, checkImageFile, prepareImage, identifyFish } from '../services/ai.js';
 
 let photo = null; // { dataUrl, base64, mediaType } — kept only in memory, never stored
 
@@ -57,7 +57,7 @@ function aiResultCard(r) {
       <div>
         <p class="eyebrow">AI identification</p>
         <h3>${esc(r.common_name)}</h3>
-        <p class="muted small"><i>${esc(r.scientific_name)}</i></p>
+        ${r.scientific_name ? `<p class="muted small"><i>${esc(r.scientific_name)}</i></p>` : ''}
       </div>
     </div>
     <div class="badge-row">${dangerBadge(r.danger)} <span class="badge badge-planned">Confidence: ${esc(r.confidence)}</span></div>
@@ -77,7 +77,8 @@ function aiResultCard(r) {
 
 export function render(ctx, param, query) {
   const mode = query.get('mode') === 'guided' ? 'guided' : 'photo';
-  const connected = aiConnected();
+  const localCnn = cnnAvailable();
+  const connected = localCnn || aiConnected();
   const scans = getScans().slice(0, 5);
 
   return `
@@ -98,8 +99,10 @@ export function render(ctx, param, query) {
         <div class="notice ${connected ? 'notice-teal' : 'notice-amber'}" style="margin-bottom:1rem">
           ${icon(connected ? 'sparkles' : 'info', 17)}
           <div>${connected
-            ? '<strong>AI connected.</strong> Photos are sent to your FishWise backend, identified by Claude, and not stored.'
-            : '<strong>AI backend not connected.</strong> You can still pick a photo — FishWise will walk you through Guided ID beside it. AI photo ID switches on once the <code>identify-fish</code> Edge Function is deployed to Supabase with an Anthropic API key (see README).'}</div>
+            ? (localCnn
+              ? '<strong>On-device AI ready.</strong> The FishWise CNN runs in this browser. Your photo is not uploaded or stored.'
+              : '<strong>Cloud AI connected.</strong> Photos are sent to the FishWise backend for identification and are not stored.')
+            : '<strong>Photo AI is unavailable.</strong> You can still identify the fish with Guided ID.'}</div>
         </div>
         <label class="dropzone" id="dropzone" for="photo-input">
           <input type="file" id="photo-input" accept="image/*" capture="environment" class="sr-only" />

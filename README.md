@@ -32,7 +32,7 @@ This opens http://localhost:5173. On Windows you can also double-click **Open Fi
 | **Academy** | 22 lessons across the Beginner, Amateur and Advanced tracks: 14 reading lessons and 8 interactive 3D lessons. It also has quizzes, a progress dashboard, search and filters, saved lessons, personal notes, printable certificates and community lessons. |
 | **3D lessons** | Eight interactive lessons:<br>• **Improved clinch knot**: the line morphs step by step around a hook.<br>• **Overhead cast**: an articulated angler, a rod that bends, a physics-based line, a clock guide, camera views and release-timing practice.<br>• **Read the water**: tap where each species holds, scored over 4 rounds.<br>• **Handle fish safely**: find the spines, barbs and safe grips on 4 fish.<br>• **Lightning: when to leave**: flash-to-bang counting and the 30-30 rule over 4 rounds.<br>• **Build a float rig**: thread 7 parts in order, then set the depth.<br>• **Play and land a fish**: set the drag and fight a fish on a live tension meter.<br>• **Fish the tide**: drag through a day of Singapore tides and read the current. |
 | **Gear Match & advisor** | FishWise is the middle man, not a shop. A one-on-one gear advisor (Claude via the `gear-advisor` Edge Function when connected, otherwise a built-in guided advisor) builds a legal gear list for where you fish, what you want to catch and your budget. Real photos of each item type, typical Singapore price ranges, which shops stock each item, starter kits, and a saved gear list you can copy and take to a shop. Business model: referral fees from partner shops (none signed yet). |
-| **Fish ID** | AI photo ID (needs the Edge Function) and an offline Guided ID. |
+| **Fish ID** | On-device FishWise CNN photo ID with safety-first Unknown/Not-a-fish rejection, plus offline Guided ID. Photos remain in the browser. Claude via the Edge Function is an optional fallback. |
 | **Weather lab** | Live NEA data as maps (heat, rain, humidity, animated wind flow, 2-hour forecast by area), a go / caution / stop verdict, readings for temperature, humidity, wind, rain, UV and haze, a UV chart, a 4-day outlook chart, spot-by-spot advice and a guide to reading the weather as an angler. |
 | **Species, Community, Events** | 12 species with real photos, Q&A with points and rewards, and FishWise Local sessions with seat booking. |
 
@@ -50,7 +50,15 @@ What syncs:
 
 The app saves to the device first, so it keeps working offline and syncs when it's back online. Shared tables store only a one-way hash of the device id, so nobody can read another person's sync code.
 
-### AI fish ID (optional)
+### On-device CNN fish ID
+
+The static site loads `models/fishwise_v4.onnx` with ONNX Runtime Web. The
+model runs in the browser and does not upload or store the selected photo.
+`models/fishwise_v4_metadata.json` contains the class order, preprocessing,
+safety thresholds and guide mappings. The default is the safety-first operating
+point; low-confidence images return **Unknown fish** rather than a forced label.
+
+### Cloud AI fallback (optional)
 
 1. Deploy `supabase/functions/identify-fish`, `ask-coach` and `gear-advisor` with the Supabase CLI.
 2. Set the `ANTHROPIC_API_KEY` secret in Supabase.

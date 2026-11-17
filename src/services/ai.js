@@ -16,12 +16,14 @@ import { CONFIG, aiConnected } from '../config.js';
 import { allLessons } from '../data/courses.js';
 import { SPECIES } from '../data/species.js';
 import { SPOTS } from '../data/spots.js';
+import { cnnAvailable, identifyFishWithCNN } from './fish-cnn.js';
 
 const MAX_EDGE = 1280;      // px — plenty for species ID, keeps uploads small
 const MAX_BYTES = 8 * 1024 * 1024;
 const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
 
 export { aiConnected };
+export { cnnAvailable };
 
 /** Validate the picked file before doing any work. Returns an error string or ''. */
 export function checkImageFile(file) {
@@ -81,12 +83,17 @@ async function callFunction(name, body) {
 
 /** @returns {Promise<object>} the structured result from identify-fish */
 export async function identifyFish(prepared) {
-  const data = await callFunction('identify-fish', {
-    image: prepared.base64,
-    mediaType: prepared.mediaType,
-  });
-  if (!data.result) throw new Error('The AI service returned no result.');
-  return data.result;
+  try {
+    return await identifyFishWithCNN(prepared.dataUrl, 'safety_first');
+  } catch (cnnError) {
+    if (!aiConnected()) throw cnnError;
+    const data = await callFunction('identify-fish', {
+      image: prepared.base64,
+      mediaType: prepared.mediaType,
+    });
+    if (!data.result) throw new Error('The AI service returned no result.');
+    return data.result;
+  }
 }
 
 /** @returns {Promise<string>} */
